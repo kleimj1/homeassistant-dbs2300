@@ -1,0 +1,31 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "title": "DBS2300 Konfiguration",
+                "description": "Bitte geben Sie die Informationen zu Ihrem DBS2300-Gerät ein.",
+                "data": {
+                    "host": "Host",
+                    "device_id": "Geräte-ID",
+                    "local_key": "Lokaler Schlüssel"
+                }
+            }
+        },
+        "error": {
+            "cannot_connect": "Kann keine Verbindung zum Gerät herstellen."
+        }
+    },
+    "options": {
+        "step": {
+            "init": {
+                "title": "DBS2300 Optionen",
+                "description": "Aktualisieren Sie die Konfiguration Ihres DBS2300-Geräts.",
+                "data": {
+                    "host": "Host",
+                    "device_id": "Geräte-ID",
+                    "local_key": "Lokaler Schlüssel"
+                }
+            }
+        }
+    }
+}
