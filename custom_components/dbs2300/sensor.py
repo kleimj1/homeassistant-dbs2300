@@ -37,7 +37,7 @@ class Dbs2300Sensor(CoordinatorEntity, SensorEntity):
     @property
     def unique_id(self):
         """Return a unique ID."""
-        return f"{self.coordinator.config['device_id']}_{self._sensor_type}"
+        return f"{self.coordinator.entry.data['device_id']}_{self._sensor_type}"
 
     @property
     def device_state_attributes(self):
