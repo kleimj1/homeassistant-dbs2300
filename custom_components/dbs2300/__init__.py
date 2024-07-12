@@ -1,59 +1,46 @@
-import asyncio
 import logging
-import async_timeout
-
+import asyncio
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
+import tinytuya
 
-from .const import DOMAIN, SCAN_INTERVAL
+from .const import DOMAIN
 
-PLATFORMS = ["sensor", "switch"]
+_LOGGER = logging.getLogger(__name__)
 
-async def async_setup_entry(hass, entry):
+async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up DBS2300 from a config entry."""
+    coordinator = DBS2300DataUpdateCoordinator(hass, entry)
+    await coordinator.async_config_entry_first_refresh()
+
     hass.data.setdefault(DOMAIN, {})
-
-    coordinator = DBS2300DataUpdateCoordinator(
-        hass, entry.data
-    )
-
-    await coordinator.async_refresh()
-
-    if not coordinator.last_update_success:
-        raise ConfigEntryNotReady
-
     hass.data[DOMAIN][entry.entry_id] = coordinator
 
-    for platform in PLATFORMS:
-        hass.async_add_job(
-            hass.config_entries.async_forward_entry_setup(entry, platform)
-        )
-
-    entry.add_update_listener(async_reload_entry)
+    hass.config_entries.async_setup_platforms(entry, ["sensor", "switch"])
     return True
 
 class DBS2300DataUpdateCoordinator(DataUpdateCoordinator):
     """Class to manage fetching DBS2300 data."""
 
-    def __init__(self, hass, config):
+    def __init__(self, hass, entry):
         """Initialize."""
-        self.config = config
-        self.api = DBS2300API(config)
+        self.hass = hass
+        self.entry = entry
+        self.device = tinytuya.OutletDevice(entry.data["device_id"], entry.data["host"], entry.data["local_key"])
 
         super().__init__(
             hass,
             _LOGGER,
             name=DOMAIN,
+            update_method=self._async_update_data,
             update_interval=timedelta(seconds=10),
         )
 
     async def _async_update_data(self):
-        """Update data via library."""
+        """Fetch data from DBS2300."""
         try:
-            async with async_timeout.timeout(10):
-                return await self.api.get_data()
-        except Exception as error:
-            raise UpdateFailed(f"Error communicating with API: {error}")
-
-async def async_reload_entry(hass, entry):
-    """Reload config entry."""
-    await hass.config_entries.async_reload(entry.entry_id)
+            data = await self.hass.async_add_executor_job(self.device.status)
+            return data
+        except Exception as err:
+            raise UpdateFailed(f"Error communicating with device: {err}")
