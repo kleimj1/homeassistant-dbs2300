@@ -1,35 +1,28 @@
 import logging
 from homeassistant.components.sensor import SensorEntity
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from .const import DOMAIN, SENSOR_TYPES
 
 _LOGGER = logging.getLogger(__name__)
 
-async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
+async def async_setup_entry(hass, entry, async_add_entities):
     """Set up the DBS2300 sensors."""
-    if discovery_info is None:
-        return
+    coordinator = hass.data[DOMAIN][entry.entry_id]
+    sensors = []
 
-    host = discovery_info["host"]
-    device_id = discovery_info["device_id"]
-    local_key = discovery_info["local_key"]
-
-    entities = []
     for sensor_type in SENSOR_TYPES:
-        entities.append(Dbs2300Sensor(host, device_id, local_key, sensor_type))
+        sensors.append(Dbs2300Sensor(coordinator, sensor_type))
 
-    async_add_entities(entities)
+    async_add_entities(sensors)
 
-class Dbs2300Sensor(SensorEntity):
+class Dbs2300Sensor(CoordinatorEntity, SensorEntity):
     """Representation of a DBS2300 sensor."""
 
-    def __init__(self, host, device_id, local_key, sensor_type):
+    def __init__(self, coordinator, sensor_type):
         """Initialize the sensor."""
-        self._host = host
-        self._device_id = device_id
-        self._local_key = local_key
+        super().__init__(coordinator)
         self._sensor_type = sensor_type
         self._name = SENSOR_TYPES[sensor_type]
-        self._state = None
 
     @property
     def name(self):
@@ -39,13 +32,16 @@ class Dbs2300Sensor(SensorEntity):
     @property
     def state(self):
         """Return the state of the sensor."""
-        return self._state
+        return self.coordinator.data.get(self._sensor_type)
 
-    async def async_update(self):
-        """Fetch new state data for the sensor."""
-        import tinytuya
-        device = tinytuya.OutletDevice(self._device_id, self._host, self._local_key)
-        data = device.status()
+    @property
+    def unique_id(self):
+        """Return a unique ID."""
+        return f"{self.coordinator.config['device_id']}_{self._sensor_type}"
 
-        if data:
-            self._state = data.get(self._sensor_type)
+    @property
+    def device_state_attributes(self):
+        """Return the state attributes."""
+        return {
+            "last_updated": self.coordinator.data.get("last_updated"),
+        }
