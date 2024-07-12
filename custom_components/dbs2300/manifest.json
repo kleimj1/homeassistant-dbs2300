@@ -1,7 +1,7 @@
 {
   "domain": "dbs2300",
   "name": "Dabbsson DBS2300",
-  "version": "0.1",
+  "version": "0.2",
   "documentation": "https://github.com/kleimj1/homeassistant-dbs2300",
   "requirements": ["tinytuya"],
   "dependencies": [],
