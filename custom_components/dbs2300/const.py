@@ -1,7 +1,5 @@
 DOMAIN = "dbs2300"
 
-CONF_API_KEY = "local_key"
-
 SENSOR_TYPES = {
     "ac_input_power": "AC Input Power",
     "ac_output_power": "AC Output Power",

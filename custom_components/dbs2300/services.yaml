@@ -1,0 +1,7 @@
+dbs2300:
+  ac_output_control:
+    description: "Steuerung der AC-Ausgangsleistung des DBS2300"
+    fields:
+      entity_id:
+        description: "Entity ID of the switch"
+        example: "switch.dbs2300_ac_output"

@@ -1,14 +1,17 @@
 import logging
 import voluptuous as vol
+
 from homeassistant import config_entries
 from homeassistant.core import callback
 from homeassistant.helpers import config_validation as cv
+
 from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
 class Dbs2300FlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Dbs2300."""
+
     VERSION = 1
     CONNECTION_CLASS = config_entries.CONN_CLASS_LOCAL_POLL
 
@@ -16,14 +19,12 @@ class Dbs2300FlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         """Handle the initial step."""
         errors = {}
         if user_input is not None:
-            if "use_secrets" in user_input and user_input["use_secrets"]:
-                # Only required keys
+            if user_input.get('use_secrets'):
                 if all(user_input[key] for key in ("host", "device_id")):
                     return self.async_create_entry(title="DBS2300", data=user_input)
                 else:
                     errors["base"] = "missing_data"
             else:
-                # All keys are required
                 if all(user_input[key] for key in ("host", "device_id", "local_key")):
                     return self.async_create_entry(title="DBS2300", data=user_input)
                 else:
@@ -46,6 +47,7 @@ class Dbs2300FlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     @callback
     def async_get_options_flow(config_entry):
         return Dbs2300OptionsFlowHandler(config_entry)
+
 
 class Dbs2300OptionsFlowHandler(config_entries.OptionsFlow):
     """Handle a option flow for Dbs2300."""
