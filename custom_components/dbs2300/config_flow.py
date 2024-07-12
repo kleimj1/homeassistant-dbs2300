@@ -1,25 +1,68 @@
+import logging
 import voluptuous as vol
 
 from homeassistant import config_entries
-from homeassistant.core import HomeAssistant
+from homeassistant.core import callback
 from homeassistant.helpers import config_validation as cv
 
 from .const import DOMAIN
 
-class DabbssonConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
-    """Handle a config flow for Dabbsson DBS2300."""
+_LOGGER = logging.getLogger(__name__)
+
+class Dbs2300FlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
+    """Handle a config flow for Dbs2300."""
 
     VERSION = 1
-    CONNECTION_CLASS = config_entries.CONN_CLASS_LOCAL_POLLING
+    CONNECTION_CLASS = config_entries.CONN_CLASS_LOCAL_POLL
 
     async def async_step_user(self, user_input=None):
         """Handle the initial step."""
+        errors = {}
         if user_input is not None:
-            return self.async_create_entry(title="Dabbsson DBS2300", data=user_input)
+            # Here you would typically validate the user input
+            return self.async_create_entry(title="DBS2300", data=user_input)
 
-        data_schema = vol.Schema({
-            vol.Required("host"): str,
-            vol.Required("device_id"): str,
-            vol.Required("local_key"): str,
-        })
-        return self.async_show_form(step_id="user", data_schema=data_schema)
+        return self.async_show_form(
+            step_id="user",
+            data_schema=vol.Schema(
+                {
+                    vol.Required("host"): str,
+                    vol.Required("device_id"): str,
+                    vol.Required("local_key"): str,
+                }
+            ),
+            errors=errors,
+        )
+
+    @staticmethod
+    @callback
+    def async_get_options_flow(config_entry):
+        return Dbs2300OptionsFlowHandler(config_entry)
+
+
+class Dbs2300OptionsFlowHandler(config_entries.OptionsFlow):
+    """Handle a option flow for Dbs2300."""
+
+    def __init__(self, config_entry):
+        """Initialize Dbs2300 options flow."""
+        self.config_entry = config_entry
+
+    async def async_step_init(self, user_input=None):
+        """Manage the options."""
+        return await self.async_step_user()
+
+    async def async_step_user(self, user_input=None):
+        """Handle the user options step."""
+        if user_input is not None:
+            return self.async_create_entry(title="", data=user_input)
+
+        return self.async_show_form(
+            step_id="user",
+            data_schema=vol.Schema(
+                {
+                    vol.Required("host", default=self.config_entry.options.get("host", "")): str,
+                    vol.Required("device_id", default=self.config_entry.options.get("device_id", "")): str,
+                    vol.Required("local_key", default=self.config_entry.options.get("local_key", "")): str,
+                }
+            ),
+        )
