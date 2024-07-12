@@ -1,35 +1,28 @@
 import logging
 from homeassistant.components.switch import SwitchEntity
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from .const import DOMAIN, SWITCH_TYPES
 
 _LOGGER = logging.getLogger(__name__)
 
-async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
+async def async_setup_entry(hass, entry, async_add_entities):
     """Set up the DBS2300 switches."""
-    if discovery_info is None:
-        return
+    coordinator = hass.data[DOMAIN][entry.entry_id]
+    switches = []
 
-    host = discovery_info["host"]
-    device_id = discovery_info["device_id"]
-    local_key = discovery_info["local_key"]
-
-    entities = []
     for switch_type in SWITCH_TYPES:
-        entities.append(Dbs2300Switch(host, device_id, local_key, switch_type))
+        switches.append(Dbs2300Switch(coordinator, switch_type))
 
-    async_add_entities(entities)
+    async_add_entities(switches)
 
-class Dbs2300Switch(SwitchEntity):
+class Dbs2300Switch(CoordinatorEntity, SwitchEntity):
     """Representation of a DBS2300 switch."""
 
-    def __init__(self, host, device_id, local_key, switch_type):
+    def __init__(self, coordinator, switch_type):
         """Initialize the switch."""
-        self._host = host
-        self._device_id = device_id
-        self._local_key = local_key
+        super().__init__(coordinator)
         self._switch_type = switch_type
         self._name = SWITCH_TYPES[switch_type]
-        self._state = False
 
     @property
     def name(self):
@@ -38,19 +31,20 @@ class Dbs2300Switch(SwitchEntity):
 
     @property
     def is_on(self):
-        """Return true if the switch is on."""
-        return self._state
+        """Return true if switch is on."""
+        return self.coordinator.data.get(self._switch_type) == "ON"
+
+    @property
+    def unique_id(self):
+        """Return a unique ID."""
+        return f"{self.coordinator.entry.data['device_id']}_{self._switch_type}"
 
     async def async_turn_on(self, **kwargs):
         """Turn the switch on."""
-        import tinytuya
-        device = tinytuya.OutletDevice(self._device_id, self._host, self._local_key)
-        device.set_status(True, self._switch_type)
-        self._state = True
+        await self.hass.async_add_executor_job(self.coordinator.device.turn_on, self._switch_type)
+        await self.coordinator.async_request_refresh()
 
     async def async_turn_off(self, **kwargs):
         """Turn the switch off."""
-        import tinytuya
-        device = tinytuya.OutletDevice(self._device_id, self._host, self._local_key)
-        device.set_status(False, self._switch_type)
-        self._state = False
+        await self.hass.async_add_executor_job(self.coordinator.device.turn_off, self._switch_type)
+        await self.coordinator.async_request_refresh()
