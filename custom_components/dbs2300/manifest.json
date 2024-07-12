@@ -1,0 +1,14 @@
+{
+  "domain": "dbs2300",
+  "name": "DBS2300 Integration",
+  "version": "1.0.0",
+  "documentation": "https://github.com/kleimj1/homeassistant-dbs2300",
+  "requirements": [
+    "tinytuya"
+  ],
+  "dependencies": [],
+  "codeowners": [
+    "@kleimj1"
+  ]
+}
+}
