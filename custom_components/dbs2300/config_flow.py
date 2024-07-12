@@ -1,17 +1,14 @@
 import logging
 import voluptuous as vol
-
 from homeassistant import config_entries
 from homeassistant.core import callback
 from homeassistant.helpers import config_validation as cv
-
 from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
 class Dbs2300FlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Dbs2300."""
-
     VERSION = 1
     CONNECTION_CLASS = config_entries.CONN_CLASS_LOCAL_POLL
 
@@ -19,8 +16,18 @@ class Dbs2300FlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         """Handle the initial step."""
         errors = {}
         if user_input is not None:
-            # Here you would typically validate the user input
-            return self.async_create_entry(title="DBS2300", data=user_input)
+            if "use_secrets" in user_input and user_input["use_secrets"]:
+                # Only required keys
+                if all(user_input[key] for key in ("host", "device_id")):
+                    return self.async_create_entry(title="DBS2300", data=user_input)
+                else:
+                    errors["base"] = "missing_data"
+            else:
+                # All keys are required
+                if all(user_input[key] for key in ("host", "device_id", "local_key")):
+                    return self.async_create_entry(title="DBS2300", data=user_input)
+                else:
+                    errors["base"] = "missing_data"
 
         return self.async_show_form(
             step_id="user",
@@ -28,7 +35,8 @@ class Dbs2300FlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 {
                     vol.Required("host"): str,
                     vol.Required("device_id"): str,
-                    vol.Required("local_key"): str,
+                    vol.Optional("local_key"): str,
+                    vol.Optional("use_secrets", default=False): bool,
                 }
             ),
             errors=errors,
@@ -38,7 +46,6 @@ class Dbs2300FlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     @callback
     def async_get_options_flow(config_entry):
         return Dbs2300OptionsFlowHandler(config_entry)
-
 
 class Dbs2300OptionsFlowHandler(config_entries.OptionsFlow):
     """Handle a option flow for Dbs2300."""
@@ -62,7 +69,8 @@ class Dbs2300OptionsFlowHandler(config_entries.OptionsFlow):
                 {
                     vol.Required("host", default=self.config_entry.options.get("host", "")): str,
                     vol.Required("device_id", default=self.config_entry.options.get("device_id", "")): str,
-                    vol.Required("local_key", default=self.config_entry.options.get("local_key", "")): str,
+                    vol.Optional("local_key", default=self.config_entry.options.get("local_key", "")): str,
+                    vol.Optional("use_secrets", default=self.config_entry.options.get("use_secrets", False)): bool,
                 }
             ),
         )
