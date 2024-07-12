@@ -1,4 +1,8 @@
+from datetime import timedelta
+
 DOMAIN = "dbs2300"
+SCAN_INTERVAL = timedelta(seconds=10)
+
 
 SENSOR_TYPES = {
     "ac_input_power": "AC Input Power",
