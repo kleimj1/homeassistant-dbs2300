@@ -1,14 +1,9 @@
 {
-  "domain": "dbs2300",
-  "name": "DBS2300 Integration",
-  "version": "1.0.0",
+  "domain": "homeassistant-dbs2300",
+  "name": "Home Assistant DBS2300",
+  "version": "0.1",
   "documentation": "https://github.com/kleimj1/homeassistant-dbs2300",
-  "requirements": [
-    "tinytuya"
-  ],
+  "requirements": [],
   "dependencies": [],
-  "codeowners": [
-    "@kleimj1"
-  ]
-}
+  "codeowners": ["@kleimj1"]
 }

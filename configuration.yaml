@@ -1,0 +1,6 @@
+# configuration.yaml
+
+homeassistant_dbs2300:
+  username: !secret dabbsson_username
+  password: !secret dabbsson_password
+  local_key: !secret dabbsson_local_key
