@@ -1,20 +1,31 @@
 {
-  "title": "DBS2300 Integration",
-  "config": {
-    "step": {
-      "user": {
-        "title": "DBS2300 konfigurieren",
-        "description": "Richte deinen Dabbsson DBS2300 Solar Generator ein.",
-        "data": {
-          "host": "Host",
-          "device_id": "Geräte ID",
-          "local_key": "Lokaler Schlüssel",
-          "use_secrets": "Verwende secrets.yaml"
+    "config": {
+        "step": {
+            "user": {
+                "title": "DBS2300 Configuration",
+                "description": "Please enter the information of your DBS2300 device.",
+                "data": {
+                    "host": "Host",
+                    "device_id": "Device ID",
+                    "local_key": "Local Key"
+                }
+            }
+        },
+        "error": {
+            "cannot_connect": "Cannot connect to the device."
         }
-      }
     },
-    "error": {
-      "missing_data": "Bitte füllen Sie alle erforderlichen Felder aus."
+    "options": {
+        "step": {
+            "init": {
+                "title": "DBS2300 Options",
+                "description": "Update the configuration of your DBS2300 device.",
+                "data": {
+                    "host": "Host",
+                    "device_id": "Device ID",
+                    "local_key": "Local Key"
+                }
+            }
+        }
     }
-  }
 }
