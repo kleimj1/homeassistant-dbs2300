@@ -1,49 +1,40 @@
-"""Platform for switch integration."""
+import logging
 from homeassistant.components.switch import SwitchEntity
-import tinytuya
 from .const import DOMAIN
 
-async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
-    """Set up the switch platform."""
-    host = hass.data[DOMAIN]['host']
-    device_id = hass.data[DOMAIN]['device_id']
-    local_key = hass.data[DOMAIN]['local_key']
-    
-    switches = []
-    switches.append(DBS2300Switch(host, device_id, local_key))
-    async_add_entities(switches, True)
+_LOGGER = logging.getLogger(__name__)
 
-class DBS2300Switch(SwitchEntity):
-    """Representation of a Switch."""
+async def async_setup_entry(hass, config_entry, async_add_entities):
+    """Set up the Dabbsson DBS2300 switches."""
+    config = hass.data[DOMAIN][config_entry.entry_id]
+    entities = [
+        DabbssonSwitch(config, "AC Output Control", "ac_output_control"),
+    ]
+    async_add_entities(entities, True)
 
-    def __init__(self, host, device_id, local_key):
-        """Initialize the switch."""
+class DabbssonSwitch(SwitchEntity):
+    """Representation of a Dabbsson DBS2300 switch."""
+
+    def __init__(self, config, name, switch_type):
+        self._config = config
+        self._name = name
+        self._type = switch_type
         self._state = False
-        self._name = "DBS2300 Switch"
-        self.device = tinytuya.OutletDevice(device_id, host, local_key)
-        self.device.set_version(3.3)
 
     @property
     def name(self):
-        """Return the name of the switch."""
         return self._name
 
     @property
     def is_on(self):
-        """Return true if switch is on."""
         return self._state
 
-    async def async_turn_on(self, **kwargs):
-        """Turn the switch on."""
-        self.device.set_status(True, '1')  # Beispiel: Schaltet AC Output Power ein
+    def turn_on(self, **kwargs):
+        # Hier die tinytuya Logik zum Einschalten der AC-Ausgangsleistung einfügen
         self._state = True
+        self.schedule_update_ha_state()
 
-    async def async_turn_off(self, **kwargs):
-        """Turn the switch off."""
-        self.device.set_status(False, '1')  # Beispiel: Schaltet AC Output Power aus
+    def turn_off(self, **kwargs):
+        # Hier die tinytuya Logik zum Ausschalten der AC-Ausgangsleistung einfügen
         self._state = False
-
-    async def async_update(self):
-        """Fetch new state data for the switch."""
-        status = self.device.status()
-        self._state = status['dps']['1']
+        self.schedule_update_ha_state()
