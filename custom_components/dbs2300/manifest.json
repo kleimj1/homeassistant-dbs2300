@@ -1,18 +1,17 @@
 {
-    "domain": "dbs2300",
-    "name": "Dabbsson DBS2300 Integration",
-    "version": "1.0.0",
-    "documentation": "https://github.com/kleimj1/homeassistant-dbs2300",
-    "requirements": [
-        "tinytuya==1.2.12"
-    ],
-    "dependencies": [],
-    "codeowners": [
-        "@kleimj1"
-    ],
-    "config_flow": true,
-    "iot_class": "local_polling",
-    "icons": {
-        "logo": "/custom_components/dbs2300/icon.png"
+  "domain": "dbs2300",
+  "name": "DBS2300",
+  "version": "1.0.0",
+  "documentation": "https://github.com/kleimj1/homeassistant-dbs2300",
+  "dependencies": [],
+  "codeowners": ["@kleimj1"],
+  "requirements": ["tinytuya==1.2.10"],
+  "iot_class": "local_polling",
+  "config_flow": true,
+  "icons": [
+    {
+      "name": "icon",
+      "url": "/local/custom_components/dbs2300/icon.png"
     }
+  ]
 }
