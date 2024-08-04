@@ -11,21 +11,21 @@ from .const import DOMAIN
 _LOGGER = logging.getLogger(__name__)
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Set up DBS2300 from a config entry."""
+    """Richte DBS2300 aus einem Konfigurationseintrag ein."""
     coordinator = DBS2300DataUpdateCoordinator(hass, entry)
     await coordinator.async_config_entry_first_refresh()
 
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN][entry.entry_id] = coordinator
 
-    hass.config_entries.async_setup_platforms(entry, ["sensor", "switch"])
+    await hass.config_entries.async_forward_entry_setups(entry, ["sensor", "switch"])
     return True
 
 class DBS2300DataUpdateCoordinator(DataUpdateCoordinator):
-    """Class to manage fetching DBS2300 data."""
+    """Klasse zur Verwaltung der Datenaktualisierung von DBS2300."""
 
     def __init__(self, hass, entry):
-        """Initialize."""
+        """Initialisierung."""
         self.hass = hass
         self.entry = entry
         self.device = tinytuya.OutletDevice(entry.data["device_id"], entry.data["host"], entry.data["local_key"])
@@ -39,9 +39,9 @@ class DBS2300DataUpdateCoordinator(DataUpdateCoordinator):
         )
 
     async def _async_update_data(self):
-        """Fetch data from DBS2300."""
+        """Daten von DBS2300 abrufen."""
         try:
             data = await self.hass.async_add_executor_job(self.device.status)
             return data
         except Exception as err:
-            raise UpdateFailed(f"Error communicating with device: {err}")
+            raise UpdateFailed(f"Fehler bei der Kommunikation mit dem Gerät: {err}")
